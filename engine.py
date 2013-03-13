@@ -42,7 +42,9 @@ def setup_images():
             "Girl": "Character Pink Girl.png",
             "Princess": "Character Princess Girl.png",
             "Harry": "Harry.png",
-            "Voldemort" : "Voldemort.png"
+            "Voldemort" : "Voldemort.png",
+            "Elderwand" : "elderwand.png",
+            "Lightning" : "bolt.png"
             }
 
     for k,v in filenames.items():
@@ -69,15 +71,16 @@ class Board(object):
         self.offset_y = -SCREEN_Y/2 + board_height_px/2 + TILE_HEIGHT/4
 
 
-        # Make a map with a stoneblock border and filled with grass
+        # Make a map with a border and filled with grass
+        # changed to make map entirely out of grass but could add in different border
         game_map = []
         inner_width = width-2
         for i in range(height):
             if i == 0 or i == height-1:
                 # On the boundaries
-                game_map.append(["Block"] * width)
+                game_map.append(["GrassBlock"] * width)
             else:
-                row = ["Block"] + (["GrassBlock"] * inner_width) + ["Block"]
+                row = ["GrassBlock"] + (["GrassBlock"] * inner_width) + ["GrassBlock"]
                 game_map.append(row)
         
         self.base_board = game_map

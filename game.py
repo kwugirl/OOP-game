@@ -16,7 +16,7 @@ GAME_WIDTH = 7
 GAME_HEIGHT = 7
 GAME_STATE = True
 number_horcruxes = 2
-
+GAME_ASPLODE = False
 #### Put class definitions here ####
 
 class Harry(GameElement):
@@ -26,6 +26,7 @@ class Harry(GameElement):
 	def __init__(self):
 		GameElement.__init__(self)
 		self.inventory = []
+		self.timer = 0
 
 	def next_pos(self, direction): # this is an instance method inside a class. self is used to refer to the instance it's inside of. Returns a tuple where [0] is the x position and [1] is the y position
 		if direction == "up":
@@ -50,11 +51,36 @@ class Harry(GameElement):
 			GAME_BOARD.del_el(player.x, player.y)
 			GAME_BOARD.set_el(HARRY.x, HARRY.y, VOLDEMORT)
 
-			global GAME_STATE # need to declare it as a global variable in the function we're using
+			global GAME_STATE # need to declare it as a global variable in the function we're using to indicate within the function stackframe that we're using the outside global variable, not making a new one inside the function universe
 			GAME_STATE = False # indicates that the game is now over! 
 
 		else:
 			GAME_BOARD.draw_msg("You can't kill Harry yet, you need the Elder Wand! Ahh pain!!!")
+
+	def update(self, dt):
+		global GAME_ASPLODE
+		global GAME_STATE
+		if GAME_ASPLODE == True:
+			self.timer += dt
+			GAME_STATE = False
+
+			# insert something cool to happen while delay is going on
+
+		if self.timer > 5:
+			# print("Stuff happened after 5 seconds")
+			self.timer = 0
+			GAME_STATE = True
+			GAME_ASPLODE = False
+
+			# reset Harry and Voldemort at new positions on the board
+			position_harry = unique_rand_position("Harry")
+			GAME_BOARD.set_el(position_harry[0], position_harry[1], HARRY)
+
+			position_voldemort = unique_rand_position("Voldemort")
+			GAME_BOARD.set_el(position_voldemort[0], position_voldemort[1], VOLDEMORT)
+
+			GAME_BOARD.draw_msg("Go after Voldemort again!")
+
 
 class Voldemort(GameElement):
 	IMAGE = "Voldemort"
@@ -77,22 +103,17 @@ class Voldemort(GameElement):
 
 	def interact(self, player, name):
 		if len(player.inventory) == number_horcruxes:
-			GAME_BOARD.draw_msg("Harry is having a heart-to-heart w/ Dumbledore right now")
-
 			# delete both from the board
 			GAME_BOARD.del_el(VOLDEMORT.x, VOLDEMORT.y)
 			GAME_BOARD.del_el(HARRY.x, HARRY.y)
 
-### INSERT FANCY FUNCTION GRAPHIC TIME DELAY HEREEEE
-
 			player.inventory.append("harry_horcrux")
 
-			# reset Harry and Voldemort at new positions on the board
-			position = unique_rand_position("Harry")
-			GAME_BOARD.set_el(position[0], position[1], HARRY)
+			GAME_BOARD.draw_msg("Harry is having a heart-to-heart w/ Dumbledore right now...")
 
-			position = unique_rand_position("Voldemort")
-			GAME_BOARD.set_el(position[0], position[1], VOLDEMORT)
+			global GAME_ASPLODE
+			GAME_ASPLODE = True # this sets off the update function to have a delay before character reappear again. This is under the Harry interact function.
+			
 			
 		elif len(player.inventory) == number_horcruxes+1: # harry has sacrificed himself and has attacked Voldemort a 2nd time, game over
 			GAME_BOARD.draw_msg("Hooray! The magical world is saved! Voldemort is dead! Hit esc to exit.")
@@ -111,7 +132,7 @@ class Voldemort(GameElement):
 			GAME_BOARD.draw_msg("Don't run into Voldemort before you have all the Horcruxes!")
 
 class ElderWand(GameElement):
-	IMAGE = "OrangeGem"
+	IMAGE = "Elderwand"
 	SOLID = False
 
 	def interact(self, player, name):
@@ -173,7 +194,7 @@ class Last_Horcrux(GameElement):
 
 def initialize(): # could pass a variable in here if you wanted to start a saved game (i.e. previous player positions)
     """Put game initialization code here"""
-    
+
     global HARRY # defines HARRY as a global variable to be able to use in other functions later on like keyboard_handler
     HARRY = Harry()
     GAME_BOARD.register(HARRY)
