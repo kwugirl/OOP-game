@@ -15,7 +15,7 @@ PLAYER = None
 GAME_WIDTH = 7
 GAME_HEIGHT = 7
 GAME_STATE = True
-number_horcruxes = 3
+number_horcruxes = 2
 
 #### Put class definitions here ####
 
@@ -77,15 +77,33 @@ class Voldemort(GameElement):
 
 	def interact(self, player, name):
 		if len(player.inventory) == number_horcruxes:
-			GAME_BOARD.draw_msg("Hooray! The magical world is saved! Voldemort is dead! Hit esc to exit.")
+			GAME_BOARD.draw_msg("Harry is having a heart-to-heart w/ Dumbledore right now")
+
+			# delete both from the board
+			GAME_BOARD.del_el(VOLDEMORT.x, VOLDEMORT.y)
+			GAME_BOARD.del_el(HARRY.x, HARRY.y)
+
+### INSERT FANCY FUNCTION GRAPHIC TIME DELAY HEREEEE
+
+			player.inventory.append("harry_horcrux")
+
+			# reset Harry and Voldemort at new positions on the board
+			position = unique_rand_position("Harry")
+			GAME_BOARD.set_el(position[0], position[1], HARRY)
+
+			position = unique_rand_position("Voldemort")
+			GAME_BOARD.set_el(position[0], position[1], VOLDEMORT)
 			
+		elif len(player.inventory) == number_horcruxes+1: # harry has sacrificed himself and has attacked Voldemort a 2nd time, game over
+			GAME_BOARD.draw_msg("Hooray! The magical world is saved! Voldemort is dead! Hit esc to exit.")
+
 			# delete Voldemort from the board
 			GAME_BOARD.del_el(VOLDEMORT.x, VOLDEMORT.y)
-
 			# move Harry to that position
 			GAME_BOARD.del_el(player.x, player.y)
 			GAME_BOARD.set_el(VOLDEMORT.x, VOLDEMORT.y, HARRY)
-
+			
+			# ends the game
 			global GAME_STATE
 			GAME_STATE = False
 
@@ -100,6 +118,9 @@ class ElderWand(GameElement):
 
 		if name == "Voldemort":
 			player.inventory.append(self)
+
+			del positions_dict["elderwand"] # elderwand off the board, remove from positions dictionary
+
 			GAME_BOARD.draw_msg("%s has just acquired the Elder Wand! Watch out Harry!" % name)
 		else:
 			GAME_BOARD.draw_msg("The Elder Wand is off limits to you!")
@@ -132,13 +153,16 @@ class Horcruxes(GameElement):
 
 ### This class is everything that appears conditionally			
 class Last_Horcrux(GameElement):
-	IMAGE = "Key"
+	IMAGE = "GreenGem"
 	SOLID = False
 
 	def interact(self, player, name):
 
 		if name == "Harry":
 			player.inventory.append(self)
+
+			del positions_dict["horcrux"] # all horcruxes off the board, remove from positions dictionary
+
 			GAME_BOARD.draw_msg("%s has just acquired all of the Horcruxes! Watch out Voldemort!" % name)
 		else:
 			GAME_BOARD.draw_msg("Voldemort doesn't care about Horcruxes, go get the Elder Wand instead!")
@@ -163,7 +187,7 @@ def initialize(): # could pass a variable in here if you wanted to start a saved
     voldemort_x = 6
     voldemort_y = 3
     GAME_BOARD.set_el(voldemort_x, voldemort_y, VOLDEMORT)
-    print "Voldemort's starting position", voldemort_x, voldemort_y
+    #print "Voldemort's starting position", voldemort_x, voldemort_y
 
 ### DICTIONARY TO HOLD EVERY OBJECT'S POSITION
     global positions_dict
@@ -243,7 +267,7 @@ def character_move(character, name, direction):
 	# have character interact with the element in the next space if necessary
 	if existing_el:
 		existing_el.interact(character, name)
-		print existing_el
+		#print existing_el
 
 	# make sure Harry cannot access the Elder Wand
 	if name == "Harry" and existing_el == elderwand:
@@ -258,9 +282,9 @@ def character_move(character, name, direction):
 		GAME_BOARD.del_el(character.x, character.y) # delete player from existing pos on board
 		GAME_BOARD.set_el(next_x, next_y, character) # add player again in the new position
 		positions_dict[name] = (next_x, next_y) # resetting player's name position in the positions dictionary
-		print "%s's new position is:" % name, character.x, character.y
-		print HARRY.inventory, len(HARRY.inventory)
-		print positions_dict[name]
+		#print "%s's new position is:" % name, character.x, character.y
+		#print HARRY.inventory, len(HARRY.inventory)
+		#print positions_dict[name]
 
 def unique_rand_position(name):
     name_x = random.randint(0,GAME_WIDTH-1)
