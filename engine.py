@@ -40,7 +40,9 @@ def setup_images():
             "Cat": "Character Cat Girl.png",
             "Horns": "Character Horn Girl.png",
             "Girl": "Character Pink Girl.png",
-            "Princess": "Character Princess Girl.png"
+            "Princess": "Character Princess Girl.png",
+            "Harry": "Harry.png",
+            "Voldemort" : "Voldemort.png"
             }
 
     for k,v in filenames.items():
@@ -125,9 +127,11 @@ class Board(object):
 
     def check_bounds(self, x, y):
         if not (0 <= x < self.width):
-            raise IndexError("%r is out of bounds of the board width: %d"%(x, self.width))
+            return False
+            #raise IndexError("%r is out of bounds of the board width: %d"%(x, self.width))
         if not (0 <= y < self.height):
-            raise IndexError("%r is out of bounds of the board height: %d"%(y, self.width))
+            return False
+            #raise IndexError("%r is out of bounds of the board height: %d"%(y, self.width))
 
     def get_el(self, x, y):
         self.check_bounds(x, y)
