@@ -15,6 +15,7 @@ PLAYER = None
 GAME_WIDTH = 7
 GAME_HEIGHT = 7
 GAME_STATE = True
+number_horcruxes = 3
 
 #### Put class definitions here ####
 
@@ -40,7 +41,7 @@ class Harry(GameElement):
 	# How other game elements interact with Harry
 	def interact(self, player, name):
 		if len(player.inventory) != 0:
-			GAME_BOARD.draw_msg("Oh no Harry has died, game is over now.")
+			GAME_BOARD.draw_msg("Oh no Harry has died, game is over now. Hit esc to exit.")
 			
 			# delete harry from the board
 			GAME_BOARD.del_el(HARRY.x, HARRY.y)
@@ -53,7 +54,7 @@ class Harry(GameElement):
 			GAME_STATE = False # indicates that the game is now over! 
 
 		else:
-			GAME_BOARD.draw_msg("You can't kill Harry yet, you need the Sorceror's Stone! Ahh pain!!!")
+			GAME_BOARD.draw_msg("You can't kill Harry yet, you need the Elder Wand! Ahh pain!!!")
 
 class Voldemort(GameElement):
 	IMAGE = "Voldemort"
@@ -75,8 +76,8 @@ class Voldemort(GameElement):
 		return None
 
 	def interact(self, player, name):
-		if len(player.inventory) != 0:
-			GAME_BOARD.draw_msg("Hooray! The magical world is saved! Voldemort is dead!")
+		if len(player.inventory) == number_horcruxes:
+			GAME_BOARD.draw_msg("Hooray! The magical world is saved! Voldemort is dead! Hit esc to exit.")
 			
 			# delete Voldemort from the board
 			GAME_BOARD.del_el(VOLDEMORT.x, VOLDEMORT.y)
@@ -89,34 +90,58 @@ class Voldemort(GameElement):
 			GAME_STATE = False
 
 		else:
-			GAME_BOARD.draw_msg("Don't run into Voldemort before you have the Hallows!")
+			GAME_BOARD.draw_msg("Don't run into Voldemort before you have all the Horcruxes!")
 
-class Gem(GameElement):
-	IMAGE = "BlueGem"
+class ElderWand(GameElement):
+	IMAGE = "OrangeGem"
 	SOLID = False
 
 	def interact(self, player, name):
 
 		if name == "Voldemort":
 			player.inventory.append(self)
-			GAME_BOARD.draw_msg("%s has just acquired the Sorceror's Stone! Watch out Harry!" % name)
+			GAME_BOARD.draw_msg("%s has just acquired the Elder Wand! Watch out Harry!" % name)
 		else:
-			GAME_BOARD.draw_msg("The Sorceror's Stone is off limits to you!")
+			GAME_BOARD.draw_msg("The Elder Wand is off limits to you!")
 
-class Hallows(GameElement):
+### This class is the object that appears on the initial game board
+class Horcruxes(GameElement):
+	IMAGE = "BlueGem"
+	SOLID = False
+
+	def interact(self, player, name):
+		if name == "Harry" and len(player.inventory) < number_horcruxes-2: # has to be -2 because we append new items you've picked up to the inventory list AFTER you interact with it and get into the if conditional
+			player.inventory.append(self)
+			GAME_BOARD.draw_msg("%s now has %d Horcruxes, get the rest to kill Voldemort!" % (name, len(player.inventory)))
+
+			position = unique_rand_position("horcrux")
+			GAME_BOARD.set_el(position[0], position[1], horcrux)
+
+		elif name == "Harry" and len(player.inventory) == number_horcruxes-2:
+			player.inventory.append(self)
+			GAME_BOARD.draw_msg("%s now has all but the last %d Horcrux, go get the last one!" % (name, len(player.inventory)))
+
+			position = unique_rand_position("last_horcrux")
+			GAME_BOARD.set_el(position[0], position[1], last_horcrux)
+
+		else:
+			if len(VOLDEMORT.inventory) == 0:
+				GAME_BOARD.draw_msg("Voldemort doesn't care about Horcruxes, go get the Elder Wand instead!")
+			else:
+				GAME_BOARD.draw_msg("Voldemort has the Elder Wand now, just go after Harry!")
+
+### This class is everything that appears conditionally			
+class Last_Horcrux(GameElement):
 	IMAGE = "Key"
 	SOLID = False
 
 	def interact(self, player, name):
+
 		if name == "Harry":
 			player.inventory.append(self)
-			GAME_BOARD.draw_msg("%s has just acquired the Deathly Hallows! Watch out Voldemort!" % name)
-			
-			# trying to create and place the gem on the board after Harry has gotten the Hallows
- 			GAME_BOARD.set_el(2, 2, gem)
+			GAME_BOARD.draw_msg("%s has just acquired all of the Horcruxes! Watch out Voldemort!" % name)
 		else:
-			GAME_BOARD.draw_msg("The Deathly Hallows are off limits to you!")
-			
+			GAME_BOARD.draw_msg("Voldemort doesn't care about Horcruxes, go get the Elder Wand instead!")
 
 ####   End class definitions    ####
 
@@ -140,38 +165,33 @@ def initialize(): # could pass a variable in here if you wanted to start a saved
     GAME_BOARD.set_el(voldemort_x, voldemort_y, VOLDEMORT)
     print "Voldemort's starting position", voldemort_x, voldemort_y
 
-    starting_positions = [(0,3), (6,3)]
+### DICTIONARY TO HOLD EVERY OBJECT'S POSITION
+    global positions_dict
+    positions_dict = {
+		"Harry": (harry_x, harry_y),
+		"Voldemort": (voldemort_x, voldemort_y),
+	}
 
-    global gem
-    gem = Gem()
-    GAME_BOARD.register(gem)
+### ELDER WAND THAT APPEARS IN INITIAL GAME SETUP ###
+    global elderwand
+    elderwand = ElderWand()
+    GAME_BOARD.register(elderwand)
 
-    # commenting out this section while working on how to have gem appear only after Harry has gotten the keys
-	# gem = Gem()
- #    global gem_x # global definition because we use it later to make sure Harry can't get the Sorceror's Stone
- #    global gem_y
- #    gem_x = random.randint(0,6)
- #    gem_y = random.randint(0,6)
- #    # while loop to make sure new position isn't already taken, if it is, then make a new position
- #    while (gem_x, gem_y) in starting_positions:
-	# 	gem_x = random.randint(0,6)
-	# 	gem_y = random.randint(0,6)    	
-	# # once confirmed that this is a unique tuple of x,y position, add it to the list
- #    starting_positions.append((gem_x, gem_y))
- #    GAME_BOARD.register(gem)
- #    GAME_BOARD.set_el(gem_x, gem_y, gem)
+    position = unique_rand_position("elderwand")
+    GAME_BOARD.set_el(position[0], position[1], elderwand)
 
-    hallows = Hallows()
-    global hallows_x  # global definition because we use it later to make sure Voldemort can't get the Hallows
-    global hallows_y
-    hallows_x = random.randint(0,6)
-    hallows_y = random.randint(0,6)
-    while (hallows_x, hallows_y) in starting_positions:
-		hallows_x = random.randint(0,6)
-		hallows_y = random.randint(0,6)    	
-    starting_positions.append((hallows_x, hallows_y))
-    GAME_BOARD.register(hallows)
-    GAME_BOARD.set_el(hallows_x, hallows_y, hallows)
+### THE FIRST HORCRUX THAT HARRY HAS TO PICK UP ###
+    global horcrux
+    horcrux = Horcruxes()
+    GAME_BOARD.register(horcrux)
+    
+    position = unique_rand_position("horcrux")
+    GAME_BOARD.set_el(position[0], position[1], horcrux)
+    
+### THE LAST HORCRUX THAT APPEARS AFTER HARRY GETS THE OTHER HORCRUXES ###
+    global last_horcrux
+    last_horcrux = Last_Horcrux()
+    GAME_BOARD.register(last_horcrux)
 
     # initial msg that shows when the game starts
     GAME_BOARD.draw_msg("Neither can live while the other survives! Arrows control Harry, #pad (1/2/3/5) controls Voldemort.")
@@ -223,27 +243,32 @@ def character_move(character, name, direction):
 	# have character interact with the element in the next space if necessary
 	if existing_el:
 		existing_el.interact(character, name)
+		print existing_el
 
-	# commenting this out while working on having gem appear only after Harry has gotten Hallows
-	# make sure Harry cannot access the sorcerer's stone
-	# if name == "Harry" and next_x == gem_x and next_y == gem_y:
-	# 	return
+	# make sure Harry cannot access the Elder Wand
+	if name == "Harry" and existing_el == elderwand:
+		return
 
-	# Make sure voldemort cannot access the deathly hallows
-	if name == "Voldemort" and next_x == hallows_x and next_y == hallows_y:
+	# Make sure voldemort cannot access the horcruxes
+	if name == "Voldemort" and (existing_el == horcrux or existing_el == last_horcrux):
 		return
 
 	# move character to the next space
 	if existing_el is None or not existing_el.SOLID:
 		GAME_BOARD.del_el(character.x, character.y) # delete player from existing pos on board
 		GAME_BOARD.set_el(next_x, next_y, character) # add player again in the new position
+		positions_dict[name] = (next_x, next_y) # resetting player's name position in the positions dictionary
 		print "%s's new position is:" % name, character.x, character.y
+		print HARRY.inventory, len(HARRY.inventory)
+		print positions_dict[name]
 
-"""
-to-do after 3/12
-move blue gem back to being sorcerer's stone that Voldemort goes after
-change it to be a yellow gem instead that appears after Harry gets the Hallows
-have yellow gem appear in a new random position that current items on board aren't occupying
-require Harry to have both items before being able to kill Voldemort
-fix check that prevents Voldemort from getting Hallows/Harry from Stone
-"""
+def unique_rand_position(name):
+    name_x = random.randint(0,GAME_WIDTH-1)
+    name_y = random.randint(0,GAME_HEIGHT-1)
+    # while loop to make sure new position isn't already taken, if it is, then make a new position
+    while (name_x, name_y) in positions_dict.values():
+        name_x = random.randint(0,GAME_WIDTH-1)
+        name_y = random.randint(0,GAME_HEIGHT-1)
+    # once confirmed that this is a unique tuple of x,y position, add it to the dictionary
+    positions_dict[name] = (name_x, name_y)
+    return (name_x, name_y)
