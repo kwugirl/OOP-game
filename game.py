@@ -108,10 +108,12 @@ class Hallows(GameElement):
 	SOLID = False
 
 	def interact(self, player, name):
-
 		if name == "Harry":
 			player.inventory.append(self)
 			GAME_BOARD.draw_msg("%s has just acquired the Deathly Hallows! Watch out Voldemort!" % name)
+			
+			# trying to create and place the gem on the board after Harry has gotten the Hallows
+ 			GAME_BOARD.set_el(2, 2, gem)
 		else:
 			GAME_BOARD.draw_msg("The Deathly Hallows are off limits to you!")
 			
@@ -136,22 +138,28 @@ def initialize(): # could pass a variable in here if you wanted to start a saved
     voldemort_x = 6
     voldemort_y = 3
     GAME_BOARD.set_el(voldemort_x, voldemort_y, VOLDEMORT)
+    print "Voldemort's starting position", voldemort_x, voldemort_y
 
     starting_positions = [(0,3), (6,3)]
 
+    global gem
     gem = Gem()
-    global gem_x # global definition because we use it later to make sure Harry can't get the Sorceror's Stone
-    global gem_y
-    gem_x = random.randint(0,6)
-    gem_y = random.randint(0,6)
-    # while loop to make sure new position isn't already taken, if it is, then make a new position
-    while (gem_x, gem_y) in starting_positions:
-		gem_x = random.randint(0,6)
-		gem_y = random.randint(0,6)    	
-	# once confirmed that this is a unique tuple of x,y position, add it to the list
-    starting_positions.append((gem_x, gem_y))
     GAME_BOARD.register(gem)
-    GAME_BOARD.set_el(gem_x, gem_y, gem)
+
+    # commenting out this section while working on how to have gem appear only after Harry has gotten the keys
+	# gem = Gem()
+ #    global gem_x # global definition because we use it later to make sure Harry can't get the Sorceror's Stone
+ #    global gem_y
+ #    gem_x = random.randint(0,6)
+ #    gem_y = random.randint(0,6)
+ #    # while loop to make sure new position isn't already taken, if it is, then make a new position
+ #    while (gem_x, gem_y) in starting_positions:
+	# 	gem_x = random.randint(0,6)
+	# 	gem_y = random.randint(0,6)    	
+	# # once confirmed that this is a unique tuple of x,y position, add it to the list
+ #    starting_positions.append((gem_x, gem_y))
+ #    GAME_BOARD.register(gem)
+ #    GAME_BOARD.set_el(gem_x, gem_y, gem)
 
     hallows = Hallows()
     global hallows_x  # global definition because we use it later to make sure Voldemort can't get the Hallows
@@ -216,9 +224,10 @@ def character_move(character, name, direction):
 	if existing_el:
 		existing_el.interact(character, name)
 
+	# commenting this out while working on having gem appear only after Harry has gotten Hallows
 	# make sure Harry cannot access the sorcerer's stone
-	if name == "Harry" and next_x == gem_x and next_y == gem_y:
-		return
+	# if name == "Harry" and next_x == gem_x and next_y == gem_y:
+	# 	return
 
 	# Make sure voldemort cannot access the deathly hallows
 	if name == "Voldemort" and next_x == hallows_x and next_y == hallows_y:
@@ -229,3 +238,12 @@ def character_move(character, name, direction):
 		GAME_BOARD.del_el(character.x, character.y) # delete player from existing pos on board
 		GAME_BOARD.set_el(next_x, next_y, character) # add player again in the new position
 		print "%s's new position is:" % name, character.x, character.y
+
+"""
+to-do after 3/12
+move blue gem back to being sorcerer's stone that Voldemort goes after
+change it to be a yellow gem instead that appears after Harry gets the Hallows
+have yellow gem appear in a new random position that current items on board aren't occupying
+require Harry to have both items before being able to kill Voldemort
+fix check that prevents Voldemort from getting Hallows/Harry from Stone
+"""
