@@ -15,7 +15,7 @@ PLAYER = None
 GAME_WIDTH = 7
 GAME_HEIGHT = 7
 GAME_STATE = True
-number_horcruxes = 2
+number_horcruxes = 6
 GAME_ASPLODE = False
 
 #### Put class definitions here ####
@@ -91,7 +91,7 @@ class Harry(GameElement):
 			position_voldemort = unique_rand_position("Voldemort")
 			GAME_BOARD.set_el(position_voldemort[0], position_voldemort[1], VOLDEMORT)
 
-			GAME_BOARD.draw_msg("Go after Voldemort again!")
+			GAME_BOARD.draw_msg("Harry, go after Voldemort again!")
 
 
 class Voldemort(GameElement):
@@ -173,7 +173,7 @@ class Horcruxes(GameElement):
 
 		elif name == "Harry" and len(player.inventory) == number_horcruxes-2:
 			player.inventory.append(self)
-			GAME_BOARD.draw_msg("%s now has all but the last %d Horcrux, go get the last one!" % (name, len(player.inventory)))
+			GAME_BOARD.draw_msg("%s now has all but the last Horcrux to get a total of %d, go get the last one!" % (name, number_horcruxes))
 
 			position = unique_rand_position("last_horcrux")
 			GAME_BOARD.set_el(position[0], position[1], last_horcrux)
@@ -196,7 +196,7 @@ class Last_Horcrux(GameElement):
 
 			del positions_dict["horcrux"] # all horcruxes off the board, remove from positions dictionary
 
-			GAME_BOARD.draw_msg("%s has just acquired all of the Horcruxes! Watch out Voldemort!" % name)
+			GAME_BOARD.draw_msg("Time to make the ultimate sacrifice, %s..." % name)
 		else:
 			GAME_BOARD.draw_msg("Voldemort doesn't care about Horcruxes, go get the Elder Wand instead!")
 
