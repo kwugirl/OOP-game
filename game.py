@@ -61,7 +61,7 @@ class Harry(GameElement):
 	def update(self, dt):
 		global GAME_ASPLODE
 		global GAME_STATE
-		if GAME_ASPLODE == True:
+		if GAME_ASPLODE == True: # this only runs after we've gotten to the GAME_ASPLODE being true in the code
 			self.timer += dt
 			GAME_STATE = False
 
@@ -75,7 +75,7 @@ class Harry(GameElement):
 			for (x,y) in board_positions:
 				GAME_BOARD.set_el(x, y, lightning_bolt)
 
-		if self.timer > 5:
+		if self.timer > 5: # this is where we set how long the delay should be
 			# print("Stuff happened after 5 seconds")
 			self.timer = 0
 			GAME_STATE = True
@@ -202,6 +202,7 @@ class Last_Horcrux(GameElement):
 
 class LightningBolt(GameElement):
 	IMAGE = "Lightning"
+
 ####   End class definitions    ####
 
 
