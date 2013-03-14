@@ -17,6 +17,7 @@ GAME_HEIGHT = 7
 GAME_STATE = True
 number_horcruxes = 2
 GAME_ASPLODE = False
+
 #### Put class definitions here ####
 
 class Harry(GameElement):
@@ -65,12 +66,23 @@ class Harry(GameElement):
 			GAME_STATE = False
 
 			# insert something cool to happen while delay is going on
+			board_positions = []
+
+			for x in range(GAME_WIDTH):
+				for y in range(GAME_HEIGHT):
+					board_positions.append((x,y))
+
+			for (x,y) in board_positions:
+				GAME_BOARD.set_el(x, y, lightning_bolt)
 
 		if self.timer > 5:
 			# print("Stuff happened after 5 seconds")
 			self.timer = 0
 			GAME_STATE = True
 			GAME_ASPLODE = False
+
+			for (x,y) in board_positions:
+				GAME_BOARD.del_el(x, y)
 
 			# reset Harry and Voldemort at new positions on the board
 			position_harry = unique_rand_position("Harry")
@@ -188,6 +200,8 @@ class Last_Horcrux(GameElement):
 		else:
 			GAME_BOARD.draw_msg("Voldemort doesn't care about Horcruxes, go get the Elder Wand instead!")
 
+class LightningBolt(GameElement):
+	IMAGE = "Lightning"
 ####   End class definitions    ####
 
 
@@ -240,6 +254,11 @@ def initialize(): # could pass a variable in here if you wanted to start a saved
 
     # initial msg that shows when the game starts
     GAME_BOARD.draw_msg("Neither can live while the other survives! Arrows control Harry, #pad (1/2/3/5) controls Voldemort.")
+
+### LIGHTNING BOLT DURING GAME DELAY
+    global lightning_bolt
+    lightning_bolt = LightningBolt()
+    GAME_BOARD.register(lightning_bolt)
 
 def keyboard_handler():
 
